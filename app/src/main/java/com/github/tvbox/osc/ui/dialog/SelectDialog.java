@@ -2,10 +2,12 @@ package com.github.tvbox.osc.ui.dialog;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.ui.adapter.SelectDialogAdapter;
@@ -40,6 +42,18 @@ public class SelectDialog<T> extends BaseDialog {
         adapter.setData(data, select);
         TvRecyclerView tvRecyclerView = ((TvRecyclerView) findViewById(R.id.list));
         tvRecyclerView.setAdapter(adapter);
+        tvRecyclerView.setSelectedPosition(select);
+        tvRecyclerView.post(new Runnable() {
+            @Override
+            public void run() {
+                tvRecyclerView.scrollToPosition(select);
+            }
+        });
+    }
+
+    public void setPosition(int select){
+        TvRecyclerView tvRecyclerView = ((TvRecyclerView) findViewById(R.id.list));
+        //tvRecyclerView.scrollToPosition(position);
         tvRecyclerView.setSelectedPosition(select);
         tvRecyclerView.post(new Runnable() {
             @Override

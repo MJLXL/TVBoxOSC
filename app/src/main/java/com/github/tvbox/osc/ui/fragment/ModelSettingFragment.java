@@ -1,12 +1,14 @@
 package com.github.tvbox.osc.ui.fragment;
 
 import android.content.DialogInterface;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.github.tvbox.osc.R;
 import com.github.tvbox.osc.api.ApiConfig;
@@ -26,6 +28,7 @@ import com.github.tvbox.osc.util.HawkConfig;
 import com.github.tvbox.osc.util.OkGoHelper;
 import com.github.tvbox.osc.util.PlayerHelper;
 import com.orhanobut.hawk.Hawk;
+import com.owen.tvrecyclerview.widget.TvRecyclerView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.jetbrains.annotations.NotNull;
@@ -41,7 +44,7 @@ import tv.danmaku.ijk.media.player.IjkMediaPlayer;
  * @date :2020/12/23
  * @description:
  */
-public class ModelSettingFragment extends BaseLazyFragment {
+public class ModelSettingFragment extends BaseLazyFragment{
     private TextView tvDebugOpen;
     private TextView tvMediaCodec;
     private TextView tvParseWebView;
@@ -53,7 +56,7 @@ public class ModelSettingFragment extends BaseLazyFragment {
     private TextView tvDns;
     private TextView tvHomeRec;
     private TextView tvSearchView;
-
+    private int pageIndex = 0;
     public static ModelSettingFragment newInstance() {
         return new ModelSettingFragment().setArguments();
     }
@@ -91,6 +94,8 @@ public class ModelSettingFragment extends BaseLazyFragment {
         tvScale.setText(PlayerHelper.getScaleName(Hawk.get(HawkConfig.PLAY_SCALE, 0)));
         tvPlay.setText(PlayerHelper.getPlayerName(Hawk.get(HawkConfig.PLAY_TYPE, 0)));
         tvRender.setText(PlayerHelper.getRenderName(Hawk.get(HawkConfig.PLAY_RENDER, 0)));
+
+
         findViewById(R.id.llDebug).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -164,10 +169,43 @@ public class ModelSettingFragment extends BaseLazyFragment {
                             return oldItem.getKey().equals(newItem.getKey());
                         }
                     }, sites, sites.indexOf(ApiConfig.get().getHomeSourceBean()));
+
+                    // 左右按键监听
+                    dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+                        @Override
+                        public boolean onKey(DialogInterface dialogInterface, int i, KeyEvent keyEvent) {
+                            if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
+                                if (i == KeyEvent.KEYCODE_DPAD_RIGHT) {  //表示按返回键 时的操作
+                                    if(pageIndex+10 <= sites.size()){
+                                        pageIndex += 10;
+                                        dialog.setPosition(pageIndex);
+                                    }else {
+                                        dialog.setPosition(sites.size());
+                                    }
+
+                                    return false;    //已处理
+                                }
+                                if (i == KeyEvent.KEYCODE_DPAD_LEFT) {  //表示按返回键 时的操作
+                                    if(pageIndex-10 <= 0){
+                                        dialog.setPosition(0);
+                                    }else {
+                                        pageIndex -= 10;
+                                        dialog.setPosition(pageIndex);
+                                    }
+                                    return false;    //已处理
+                                }
+                            }
+                            return false;
+                        }
+                    });
+
+
                     dialog.show();
                 }
             }
         });
+
+
         findViewById(R.id.llDns).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -485,4 +523,6 @@ public class ModelSettingFragment extends BaseLazyFragment {
             return "缩略图";
         }
     }
+
+
 }
